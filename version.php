@@ -18,7 +18,8 @@
  * Plugin version and other meta-data are defined here.
  *
  * @package     mod_virtualcoach
- * @copyright   2019 Dany Daniel Roche <ddanielroche@gmail.com>
+ * @copyright   2019 Salfa Meridian S.L. - Aula21
+ * @author      Dany Daniel Roche <ddanielroche@gmail.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,6 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_virtualcoach';
 $plugin->release = '0.1.0';
-$plugin->version = 2019120400;
+$plugin->version = 2019120401;
 $plugin->requires = 2018120303;
 $plugin->maturity = MATURITY_ALPHA;

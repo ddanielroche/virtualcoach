@@ -19,11 +19,18 @@
  *
  * @package     mod_virtualcoach
  * @category    string
- * @copyright   2019 Dany Daniel Roche <ddanielroche@gmail.com>
+ * @copyright   2019 Salfa Meridian S.L. - Aula21
+ * @author      Dany Daniel Roche <ddanielroche@gmail.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['es'] = 'Español';
 $string['pluginname'] = 'Virtual Coach';
+$string['modulename'] = 'Virtual Coach';
+$string['modulenameplural'] = 'Virtual Coaches';
+$string['modulename_help'] = 'The Virtual Coach activity module enables participants to have time reserve in virtual trainer.';
+$string['virtualcoachname'] = 'Virtual Coach activity name';
+$string['virtualcoachname_help'] = 'Enter name of the Virtual Coach activity that will appear on the course page.';
+$string['virtualcoachsettings'] = 'Virtual Coach activity settings';
+$string['virtualcoachfieldset'] = 'Virtual Coach activity field set';

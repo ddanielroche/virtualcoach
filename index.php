@@ -18,7 +18,8 @@
  * Display information about all the mod_virtualcoach modules in the requested course.
  *
  * @package     mod_virtualcoach
- * @copyright   2019 Dany Daniel Roche <ddanielroche@gmail.com>
+ * @copyright   2019 Salfa Meridian S.L. - Aula21
+ * @author      Dany Daniel Roche <ddanielroche@gmail.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
