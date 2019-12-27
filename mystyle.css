@@ -1,0 +1,8 @@
+.path-calendar .maincalendar, .calendarmonth {
+    width: 98%;
+    margin: 10px auto
+}
+.next {
+    text-align: right;
+    border: 1px solid transparent;
+}

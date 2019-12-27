@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Add event handlers for the virtualcoach
  *
  * @package     mod_virtualcoach
  * @copyright   2019 Salfa Meridian S.L. - Aula21
@@ -23,10 +23,20 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'mod_virtualcoach';
-$plugin->release = '0.1.0';
-$plugin->version = 2019120406;
-$plugin->requires = 2018120303;
-$plugin->maturity = MATURITY_ALPHA;
+$observers = array(
+    array(
+        'eventname' => '\core\event\user_enrolment_created',
+        'callback' => '\mod_virtualcoach\enrolment_observers::user_enrolment_created',
+    ),
+    array(
+        'eventname' => '\core\event\user_enrolment_updated',
+        'callback' => '\mod_virtualcoach\enrolment_observers::user_enrolment_updated',
+    ),
+    array(
+        'eventname' => '\core\event\user_enrolment_deleted',
+        'callback' => '\mod_virtualcoach\enrolment_observers::user_enrolment_deleted',
+    ),
+);

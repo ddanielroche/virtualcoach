@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
- *
+ * Task definition for mod_virtualcoach.
+ * 
  * @package     mod_virtualcoach
  * @copyright   2019 Salfa Meridian S.L. - Aula21
  * @author      Dany Daniel Roche <ddanielroche@gmail.com>
@@ -25,8 +25,35 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'mod_virtualcoach';
-$plugin->release = '0.1.0';
-$plugin->version = 2019120406;
-$plugin->requires = 2018120303;
-$plugin->maturity = MATURITY_ALPHA;
+$tasks = array(
+    array(
+        'classname' => '\mod_virtualcoach\task\allow_coach_access',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+        'disabled' => 0
+    ),
+    array(
+        'classname' => '\mod_virtualcoach\task\send_end_of_session_message',
+        'blocking' => 0,
+        'minute' => '55',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+        'disabled' => 0
+    ),
+    array(
+        'classname' => '\mod_virtualcoach\task\deny_coach_access',
+        'blocking' => 0,
+        'minute' => '59',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+        'disabled' => 0
+    )
+);

@@ -23,44 +23,99 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_virtualcoach\enrolment_observers;
+
 require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
+require_once($CFG->dirroot.'/course/lib.php');
+require_once($CFG->dirroot.'/calendar/lib.php');
 
-// Course_module ID, or
-$id = optional_param('id', 0, PARAM_INT);
+$categoryid = optional_param('category', null, PARAM_INT);
+// TODO Review courseid param
+$courseid = optional_param('course', 2, PARAM_INT);
+$view = optional_param('view', 'month', PARAM_ALPHA);
+$time = optional_param('time', 0, PARAM_INT);
 
-// ... module instance id.
-$v  = optional_param('v', 0, PARAM_INT);
+$url = new moodle_url('/mod/virtualcoach/view.php');
 
-if ($id) {
-    $cm             = get_coursemodule_from_id('virtualcoach', $id, 0, false, MUST_EXIST);
-    $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $moduleinstance = $DB->get_record('virtualcoach', array('id' => $cm->instance), '*', MUST_EXIST);
-} else if ($v) {
-    $moduleinstance = $DB->get_record('virtualcoach', array('id' => $n), '*', MUST_EXIST);
-    $course         = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
-    $cm             = get_coursemodule_from_instance('virtualcoach', $moduleinstance->id, $course->id, false, MUST_EXIST);
-} else {
-    print_error(get_string('missingidandcmid', 'mod_virtualcoach'));
+if (empty($time)) {
+    $time = time();
 }
 
-require_login($course, true, $cm);
+if ($courseid != SITEID) {
+    $url->param('course', $courseid);
+}
 
-$modulecontext = context_module::instance($cm->id);
+if ($categoryid) {
+    $url->param('categoryid', $categoryid);
+}
 
-$event = \mod_virtualcoach\event\course_module_viewed::create(array(
-    'objectid' => $moduleinstance->id,
-    'context' => $modulecontext
-));
-$event->add_record_snapshot('course', $course);
-$event->add_record_snapshot('virtualcoach', $moduleinstance);
-$event->trigger();
+if ($view !== 'upcoming') {
+    $time = usergetmidnight($time);
+    $url->param('view', $view);
+}
 
-$PAGE->set_url('/mod/virtualcoach/view.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($moduleinstance->name));
-$PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_context($modulecontext);
+$url->param('time', $time);
+
+$PAGE->set_url($url);
+
+$course = get_course($courseid);
+
+if ($courseid != SITEID && !empty($courseid)) {
+    navigation_node::override_active_url(new moodle_url('/course/view.php', array('id' => $course->id)));
+} else if (!empty($categoryid)) {
+    $PAGE->set_category_by_id($categoryid);
+    navigation_node::override_active_url(new moodle_url('/course/index.php', array('categoryid' => $categoryid)));
+} else {
+    $PAGE->set_context(context_system::instance());
+}
+
+require_login($course, false);
+
+$calendar = calendar_information::create($time, $courseid, $categoryid);
+
+$pagetitle = '';
+
+$strcalendar = get_string('calendar', 'calendar');
+
+switch($view) {
+    case 'day':
+        $PAGE->navbar->add(userdate($time, get_string('strftimedate')));
+        $pagetitle = get_string('dayviewtitle', 'calendar', userdate($time, get_string('strftimedaydate')));
+        break;
+    case 'month':
+        $PAGE->navbar->add(userdate($time, get_string('strftimemonthyear')));
+        $pagetitle = get_string('detailedmonthviewtitle', 'calendar', userdate($time, get_string('strftimemonthyear')));
+        break;
+    case 'upcoming':
+        $pagetitle = get_string('upcomingevents', 'calendar');
+        break;
+}
+
+// Print title and header
+$PAGE->set_pagelayout('standard');
+$PAGE->set_title("$course->shortname: $strcalendar: $pagetitle");
+$PAGE->set_heading($COURSE->fullname);
+
+$renderer = $PAGE->get_renderer('core_calendar');
+$calendar->add_sidecalendar_blocks($renderer, true, $view);
 
 echo $OUTPUT->header();
+echo '<link rel="stylesheet" type="text/css"href="mystyle.css">';
+echo $renderer->start_layout();
+echo html_writer::start_tag('div', array('class'=>'heightcontainer'));
+//echo $OUTPUT->heading(get_string('calendar', 'calendar'));
 
+// TODO review course param array($USER->id, 2)
+echo enrolment_observers::get_coach_link($USER, 2);
+
+list($data, $template) = calendar_get_view($calendar, $view);
+echo $renderer->render_from_template($template, $data);
+
+echo html_writer::end_tag('div');
+
+list($data, $template) = calendar_get_footer_options($calendar);
+echo $renderer->render_from_template($template, $data);
+
+echo $renderer->complete_layout();
 echo $OUTPUT->footer();

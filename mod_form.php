@@ -38,6 +38,7 @@ class mod_virtualcoach_mod_form extends moodleform_mod {
 
     /**
      * Defines forms elements
+     * @throws coding_exception
      */
     public function definition() {
         global $CFG;

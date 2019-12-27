@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Enrolment observers.
  *
  * @package     mod_virtualcoach
  * @copyright   2019 Salfa Meridian S.L. - Aula21
@@ -23,10 +23,30 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace mod_virtualcoach\task;
 
-$plugin->component = 'mod_virtualcoach';
-$plugin->release = '0.1.0';
-$plugin->version = 2019120406;
-$plugin->requires = 2018120303;
-$plugin->maturity = MATURITY_ALPHA;
+use coding_exception;
+use core\task\scheduled_task;
+
+/**
+ * An example of a scheduled task.
+ */
+class send_end_of_session_message extends scheduled_task {
+
+    /**
+     * Return the task's name as shown in admin screens.
+     *
+     * @return string
+     * @throws coding_exception
+     */
+    public function get_name() {
+        return get_string('sendendofsessionmessage', 'mod_virtualcoach');
+    }
+
+    /**
+     * Execute the task.
+     */
+    public function execute() {
+        echo "Hello Word from " . static::class . "\n";
+    }
+}
