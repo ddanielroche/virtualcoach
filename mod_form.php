@@ -73,6 +73,18 @@ class mod_virtualcoach_mod_form extends moodleform_mod {
         $mform->addElement('static', 'label1', 'virtualcoachsettings', get_string('virtualcoachsettings', 'mod_virtualcoach'));
         $mform->addElement('header', 'virtualcoachfieldset', get_string('virtualcoachfieldset', 'mod_virtualcoach'));
 
+        $mform->addElement('checkbox', 'autoassign', '&nbsp;', ' ' . get_string('autoassign', 'mod_virtualcoach'));
+        $mform->setDefault('autoassign', true);
+        $mform->addHelpButton('autoassign', 'autoassign', 'mod_virtualcoach');
+
+        $mform->addElement('text', 'max_hours', get_string('max_hours', 'mod_virtualcoach'));
+        $mform->setDefault('max_hours', 30);
+        $mform->addHelpButton('max_hours', 'max_hours', 'mod_virtualcoach');
+
+        $mform->addElement('text', 'max_days', get_string('max_days', 'mod_virtualcoach'));
+        $mform->setDefault('max_days', 30);
+        $mform->addHelpButton('max_days', 'max_days', 'mod_virtualcoach');
+
         // Add standard elements.
         $this->standard_coursemodule_elements();
 

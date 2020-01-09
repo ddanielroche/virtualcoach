@@ -33,11 +33,36 @@ require_once(__DIR__.'/upgradelib.php');
  *
  * @param int $oldversion
  * @return bool
+ * @throws ddl_exception
  */
 function xmldb_virtualcoach_upgrade($oldversion) {
     global $DB;
 
     $dbman = $DB->get_manager();
+
+    $virtualcoach = $dbman->get_install_xml_schema()->getTable('virtualcoach');
+
+    if ($oldversion < 2019120408) {
+        $dbman->add_field($virtualcoach, new xmldb_field(
+            'max_hours',
+            XMLDB_TYPE_INTEGER,
+            '8',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            30
+        ));
+
+        $dbman->add_field($virtualcoach, new xmldb_field(
+            'max_days',
+            XMLDB_TYPE_INTEGER,
+            '8',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            90
+        ));
+    }
 
     // For further information please read the Upgrade API documentation:
     // https://docs.moodle.org/dev/Upgrade_API

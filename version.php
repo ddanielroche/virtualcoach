@@ -27,6 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_virtualcoach';
 $plugin->release = '0.1.0';
-$plugin->version = 2019120406;
+$plugin->version = 2019120408;
 $plugin->requires = 2018120303;
 $plugin->maturity = MATURITY_ALPHA;
