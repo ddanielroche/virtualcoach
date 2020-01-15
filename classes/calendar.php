@@ -26,6 +26,11 @@
 namespace mod_virtualcoach;
 
 global $CFG;
+
+use auth_plugin_ldap;
+use core_text;
+use dml_exception;
+
 require_once($CFG->libdir.'/ldaplib.php');
 
 /**
@@ -39,27 +44,70 @@ require_once($CFG->libdir.'/ldaplib.php');
 class calendar {
 
     /**
-     * @throws \dml_exception
+     * @param bool $allow
+     * @return bool
+     * @throws dml_exception
      */
-    public static function allow_coach_access() {
-        global $DB;
-        $time = time() - 60 * 60 * 4;
-
-        $sql = "SELECT  e.location, u.username
-FROM {event} e
-INNER JOIN {user} u ON u.id = e.userid
-WHERE timestart <= $time AND timestart+timeduration >= $time";
-        $events = $DB->get_records_sql($sql);
-
-        $sql = "SELECT id, \"group\" FROM {coach}";
-        $coaches = $DB->get_records_sql($sql);
-
-        foreach ($coaches as $id => $coach) {
-            $location = "coach:$id";
-            if (array_key_exists($location, $events)) {
-                echo $coach->group . ' ' . $events[$location]->username . "\n";
-            }
+    public static function allow_coach_access($allow = true) {
+        if (!is_enabled_auth('ldap')) {
+            return false;
+        }
+        /** @var auth_plugin_ldap $auth */
+        $auth = get_auth_plugin('ldap');
+        if (empty($auth->config->memberattribute)) {
+            return false;
         }
 
+        $events = static::readEvents($allow);
+        $ldapConnection = $auth->ldap_connect();
+        foreach ($events as $event) {
+            $extusername = core_text::convert($event->username, 'utf-8', $auth->config->ldapencoding);
+            if(!($userid = $auth->ldap_find_userdn($ldapConnection, $extusername))) {
+                continue;
+            }
+            echo "\nldap_isgm - ";
+            $isgroupmember = ldap_isgroupmember($ldapConnection, $userid, [$event->group], $auth->config->memberattribute);
+            if ($allow && !$isgroupmember) {
+                echo "ldap_ma $event->group $event->username\n\n";
+                ldap_mod_add($ldapConnection, $event->group, [$auth->config->memberattribute => $userid]);
+            } elseif (!$allow && $isgroupmember) {
+                echo "ldap_md $event->group $event->username\n\n";
+                ldap_mod_del( $ldapConnection, $event->group, [$auth->config->memberattribute => $userid]);
+            }
+        }
+        $auth->ldap_close();
+        return true;
+    }
+
+    /**
+     * List event of users that auth type is 'ldap', coach assigned in a course and:
+     *
+     * time between 0 and 10 => deny access
+     * time between start and end => allow access
+     *
+     * @param bool $allow
+     * @return array
+     * @throws dml_exception
+     */
+    public static function readEvents($allow)
+    {
+        global $DB;
+
+        $time = time();
+        $sql = "SELECT  e.id, c.group, u.username
+FROM {event} e
+INNER JOIN {user} u ON u.id = e.userid
+INNER JOIN {coach_assign} ca ON ca.userid = u.id
+INNER JOIN {coach} c ON c.id = ca.coach
+WHERE u.auth = 'ldap' AND";
+        if ($allow) {
+            $sql .= " $time BETWEEN e.timestart AND e.timestart + e.timeduration\n";
+        } else {
+            $sql .= " (e.timestart + e.timeduration - $time) BETWEEN 0 and 10 * 60\n";
+        }
+        //$sql .= "ORDER BY e.id\n";
+        echo $sql;
+
+        return $DB->get_records_sql($sql);
     }
 }
