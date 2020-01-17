@@ -30,9 +30,27 @@ require_once(__DIR__.'/lib.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/calendar/lib.php');
 
+// Course_module ID, or
+$id = optional_param('id', 0, PARAM_INT);
+
+// ... module instance id.
+$v  = optional_param('v', 0, PARAM_INT);
+
+if ($id) {
+    $cm             = get_coursemodule_from_id('virtualcoach', $id, 0, false, MUST_EXIST);
+    $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+    $moduleinstance = $DB->get_record('virtualcoach', array('id' => $cm->instance), '*', MUST_EXIST);
+} else if ($v) {
+    $moduleinstance = $DB->get_record('virtualcoach', array('id' => $n), '*', MUST_EXIST);
+    $course         = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
+    $cm             = get_coursemodule_from_instance('virtualcoach', $moduleinstance->id, $course->id, false, MUST_EXIST);
+} else {
+    print_error(get_string('missingidandcmid', 'mod_virtualcoach'));
+}
+
 $categoryid = optional_param('category', null, PARAM_INT);
 // TODO Review courseid param
-$courseid = optional_param('course', 2, PARAM_INT);
+$courseid = optional_param('course', $course->id, PARAM_INT);
 $view = optional_param('view', 'month', PARAM_ALPHA);
 $time = optional_param('time', 0, PARAM_INT);
 
@@ -107,7 +125,7 @@ echo html_writer::start_tag('div', array('class'=>'heightcontainer'));
 //echo $OUTPUT->heading(get_string('calendar', 'calendar'));
 
 // TODO review course param array($USER->id, 2)
-echo enrolment_observers::get_coach_link($USER, 2);
+echo enrolment_observers::get_coach_link($USER, $courseid);
 
 list($data, $template) = calendar_get_view($calendar, $view);
 echo $renderer->render_from_template($template, $data);

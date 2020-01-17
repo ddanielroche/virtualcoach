@@ -97,7 +97,7 @@ class calendar {
         $sql = "SELECT  e.id, c.group, u.username
 FROM {event} e
 INNER JOIN {user} u ON u.id = e.userid
-INNER JOIN {coach_assign} ca ON ca.userid = u.id
+INNER JOIN {coach_assign} ca ON ca.userid = u.id and ca.course = e.courseid
 INNER JOIN {coach} c ON c.id = ca.coach
 WHERE u.auth = 'ldap' AND";
         if ($allow) {
@@ -105,7 +105,7 @@ WHERE u.auth = 'ldap' AND";
         } else {
             $sql .= " (e.timestart + e.timeduration - $time) BETWEEN 0 and 10 * 60\n";
         }
-        //$sql .= "ORDER BY e.id\n";
+        $sql .= "ORDER BY e.id\n";
         echo $sql;
 
         return $DB->get_records_sql($sql);

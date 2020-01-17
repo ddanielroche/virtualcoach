@@ -49,7 +49,7 @@ class enrolment_observers {
      * @throws Exception
      */
     public static function user_enrolment_created($event) {
-        return static::create_coach_assign($event->userid, $event->courseid);
+        return static::create_coach_assign($event->relateduserid, $event->courseid);
     }
 
     /**
@@ -62,12 +62,15 @@ class enrolment_observers {
     public static function create_coach_assign($user, $course) {
         global $DB;
 
-        $coachAssign = new stdClass();
-        $coachAssign->coach = static::get_available_coach();
-        $coachAssign->course = $course;
-        $coachAssign->userid = $user;
+        if (!$DB->record_exists('coach_assign', ['course' => $course, 'userid' => $user])) {
+            $coachAssign = new stdClass();
+            $coachAssign->coach = static::get_available_coach();
+            $coachAssign->course = $course;
+            $coachAssign->userid = $user;
 
-        return $DB->insert_record('coach_assign', $coachAssign);
+            return $DB->insert_record('coach_assign', $coachAssign);
+        }
+        return true;
     }
 
     /**
@@ -119,7 +122,8 @@ ORDER BY count(ca.coach), coach.id',null, IGNORE_MULTIPLE);
         }
 
         $coach = $DB->get_record('coach', ['id' => $coach_assign->coach], '*', MUST_EXIST);
-        return "<a href='rdp.php?username={$user->username}&machine={$coach->pool}'>Acceso Remoto</a>";
+        $name = get_string('modulename', 'mod_virtualcoach');
+        return "<a href='rdp.php?username={$user->username}&machine={$coach->pool}'>$name</a>";
     }
 
     /**
@@ -140,7 +144,7 @@ ORDER BY count(ca.coach), coach.id',null, IGNORE_MULTIPLE);
 
         return $DB->delete_records('coach_assign', [
             'course' => $event->courseid,
-            'userid' => $event->userid,
+            'userid' => $event->relateduserid,
         ]);
     }
 }

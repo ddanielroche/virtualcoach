@@ -27,6 +27,8 @@ namespace mod_virtualcoach\task;
 
 use coding_exception;
 use core\task\scheduled_task;
+use dml_exception;
+use mod_virtualcoach\calendar;
 
 /**
  * An example of a scheduled task.
@@ -45,8 +47,9 @@ class deny_coach_access extends scheduled_task {
 
     /**
      * Execute the task.
+     * @throws dml_exception
      */
     public function execute() {
-        echo "Hello Word from " . static::class . "\n";
+        calendar::allow_coach_access(false);
     }
 }
