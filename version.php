@@ -27,9 +27,10 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_virtualcoach';
 $plugin->release = '0.1.0';
-$plugin->version = 2019120409;
+$plugin->version = 2019120411;
 $plugin->requires = 2018120303;
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->dependencies = [
     'auth_ldap' => 2018120300,
+    'mod_virtualpc' => 2015020604,
 ];

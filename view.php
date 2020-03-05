@@ -30,6 +30,11 @@ require_once(__DIR__.'/lib.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/calendar/lib.php');
 
+// Code copy from Virtual PC View
+require_once(dirname(__FILE__) .'/../virtualpc/lib.php');
+require_once(dirname(__FILE__).'/../virtualpc/locallib.php');
+require_once(dirname(__FILE__).'/../virtualpc/uds_class.php');
+
 // Course_module ID, or
 $id = optional_param('id', 0, PARAM_INT);
 
@@ -125,7 +130,26 @@ echo html_writer::start_tag('div', array('class'=>'heightcontainer'));
 //echo $OUTPUT->heading(get_string('calendar', 'calendar'));
 
 // TODO review course param array($USER->id, 2)
-echo enrolment_observers::get_coach_link($USER, $courseid);
+
+$broker = uds_login();
+$pool = uds_servicespools_byname($broker, enrolment_observers::get_pool_name($USER, $courseid));
+
+if ($pool) {
+    $printaccessbutton = true;
+    $virtualpc = new stdClass();
+    $virtualpc->name = $virtualpc->poolname = $pool->name;
+    $virtualpc->thumb = $pool->thumb;
+}
+
+uds_logout($broker);
+
+$bc = new block_contents();
+$rendererVPC = $PAGE->get_renderer('mod_virtualcoach');
+$bc->content = $rendererVPC->display_virtualpc_detail($virtualpc, $id, $printaccessbutton);
+$bc->title = get_string('modulename', 'virtualpc');
+
+echo $OUTPUT->block($bc, BLOCK_POS_LEFT);
+//echo enrolment_observers::get_coach_link($USER, $courseid);
 
 list($data, $template) = calendar_get_view($calendar, $view);
 echo $renderer->render_from_template($template, $data);

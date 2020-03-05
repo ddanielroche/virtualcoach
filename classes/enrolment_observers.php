@@ -105,6 +105,19 @@ ORDER BY count(ca.coach), coach.id',null, IGNORE_MULTIPLE);
         return $DB->get_record('coach_assign', ['userid' => $user, 'course' => $course], '*', IGNORE_MULTIPLE);
     }
 
+    public static function get_pool_name($user, $curse) {
+        global $DB;
+
+        /** @var object $coach_assign */
+        if (!$coach_assign = static::get_coach_assign($user->id, $curse)) {
+            static::create_coach_assign($user->id, $curse);
+            $coach_assign = static::get_coach_assign($user->id, $curse);
+        }
+
+        $coach = $DB->get_record('coach', ['id' => $coach_assign->coach], '*', MUST_EXIST);
+        return $coach->pool;
+    }
+
     /**
      * @param $user
      * @param $curse
