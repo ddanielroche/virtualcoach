@@ -109,7 +109,7 @@ class mod_virtualcoach_renderer extends plugin_renderer_base {
                             'value' => get_string('joinvirtualpc', 'virtualpc'),
                             'name' => 'btnname',
                             'onclick' => 'window.open(\''.$target->out(false) . '\', \'doloadcontent\',
-                                    \'menubar=0, location=0, scrollbars=0, resizable=0, width=900, height=900\', 0);', );
+                                    \'menubar=0, location=0, scrollbars=0, resizable=0, width=screen.width, height=screen.height\', 0);', );
             $html .= html_writer::empty_tag('input', $param);
 
             $html .= html_writer::end_tag('form');

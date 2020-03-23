@@ -27,6 +27,7 @@
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(dirname(dirname(__FILE__)).'/virtualpc/uds_class.php');
 require_once(dirname(dirname(__FILE__)).'/virtualpc/locallib.php');
+require_once(__DIR__.'/login_form.php');
 
 $id = required_param('id', PARAM_INT);
 $sesskey = required_param('sesskey', PARAM_ALPHANUM);
@@ -58,43 +59,48 @@ $PAGE->set_url($url);
 $PAGE->set_title(format_string($poolName));
 $PAGE->set_heading($course->fullname);
 
-if (has_capability('mod/virtualpc:join', $context) && confirm_sesskey($sesskey)) {
+$loginURL = new moodle_url('/mod/virtualcoach/join.php', array ('id' => $id, 'sesskey' => $sesskey, 'poolName' => $poolName));
+$mform = new login_form($loginURL);
 
-    $broker = uds_login();
+if ($arrayData = $mform->get_data()) {
 
-    $pool = uds_servicespools_byname($broker, $poolName);
+    if (has_capability('mod/virtualpc:join', $context) && confirm_sesskey($sesskey)) {
 
-    $ticketid = uds_tickets_create($broker, $USER->username, $pool->id,
-                      $USER->firstname . " " . $USER->lastname);
+        $broker = uds_login();
 
-    uds_logout($broker);
+        $pool = uds_servicespools_byname($broker, $poolName);
 
-    if ($pool->id or $ticketid > 0) {
+        $ticketid = $mform->uds_user_tickets_create($broker, $USER->username, $arrayData->password, $pool->id,
+            $USER->firstname . " " . $USER->lastname);
 
-        $params = array(
-        'context' => $context,
-        'objectid' => $cm->id
-        );
-        $event = \mod_virtualpc\event\virtualpc_joined::create($params);
-        $event->add_record_snapshot('virtualpc', $poolName);
-        $event->trigger();
+        uds_logout($broker);
 
-        if (preg_match('/^https/i', get_config('virtualpc', 'serverurl'))) {
-            $target = get_config('virtualpc', 'serverurl') . '/tkauth/' . $ticketid;
+        if ($pool->id or $ticketid > 0) {
+
+            $params = array(
+                'context' => $context,
+                'objectid' => $cm->id
+            );
+            /*$event = \mod_virtualpc\event\virtualpc_joined::create($params);
+            $event->add_record_snapshot('virtualpc', $poolName);
+            $event->trigger();*/
+
+            if (preg_match('/^https/i', get_config('virtualpc', 'serverurl'))) {
+                $target = get_config('virtualpc', 'serverurl') . '/tkauth/' . $ticketid;
+            } else {
+                $target = get_config('virtualpc', 'serverurl') . ':' .
+                    get_config('virtualpc', 'serverport') . '/tkauth/' . $ticketid;
+            }
+
+            redirect($target);
+
         } else {
-            $target = get_config('virtualpc', 'serverurl') . ':' .
-                      get_config('virtualpc', 'serverport') . '/tkauth/'.$ticketid;
+            $msg = get_string('idpoolnotfound', 'virtualpc', $pool->id);
         }
 
-        redirect($target);
-
     } else {
-        $msg = get_string('idpoolnotfound', 'virtualpc', $pool->id);
-    }
-
-} else {
         $msg = get_string('usernotenrolled', 'virtualpc');
-}
+    }
 
 echo $OUTPUT->header();
 
@@ -102,3 +108,9 @@ notice ($msg, new moodle_url('/course/view.php', array('id' => $course->id)));
 
 // Finish the page.
 echo $OUTPUT->footer();
+
+} else {
+    echo $OUTPUT->header();
+    $mform->display();
+    echo $OUTPUT->footer();
+}
