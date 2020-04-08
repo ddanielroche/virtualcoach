@@ -64,6 +64,26 @@ function xmldb_virtualcoach_upgrade($oldversion) {
         ));
     }
 
+    if ($oldversion < 2019120413) {
+        $dbman->add_field($virtualcoach, new xmldb_field(
+            'default_coach_id',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+            null,
+            null
+        ));
+
+        $dbman->add_key($virtualcoach, new xmldb_key(
+            'fk_default_coach_id',
+            XMLDB_KEY_FOREIGN,
+            array('default_coach_id'),
+            'coach',
+            array('id')
+        ));
+    }
+
     // For further information please read the Upgrade API documentation:
     // https://docs.moodle.org/dev/Upgrade_API
     //

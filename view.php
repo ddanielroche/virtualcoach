@@ -132,7 +132,7 @@ echo html_writer::start_tag('div', array('class'=>'heightcontainer'));
 // TODO review course param array($USER->id, 2)
 
 $broker = uds_login();
-$pool = uds_servicespools_byname($broker, enrolment_observers::get_pool_name($USER, $courseid));
+$pool = uds_servicespools_byname($broker, enrolment_observers::get_pool_name($USER, $courseid, $moduleinstance));
 
 if ($pool) {
     $printaccessbutton = true;

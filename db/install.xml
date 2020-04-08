@@ -16,10 +16,12 @@
         <FIELD NAME="autoassign" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Enable auto assign virtual coach to student in course"/>
         <FIELD NAME="max_hours" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="30" SEQUENCE="false" COMMENT="Maximum number of hours to consume per user"/>
         <FIELD NAME="max_days" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="90" SEQUENCE="false" COMMENT="Maximum number of days to consume per user"/>
+        <FIELD NAME="default_coach_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Default coach if autoassign is false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="fk_course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="fk_default_coach_id" TYPE="foreign" FIELDS="default_coach_id" REFTABLE="coach" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="coach" COMMENT="Coaches available in network for courses.">

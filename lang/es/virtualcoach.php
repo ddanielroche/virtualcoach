@@ -46,3 +46,5 @@ $string['max_hours'] = 'Horas Máximo';
 $string['max_hours_help'] = 'Máximo número de horas a consumir por usuario.';
 $string['max_days'] = 'Días Máximo';
 $string['max_days_help'] = 'Máximo número de días a consumir por usuario.';
+$string['default_coach_id'] = 'Entrenador por defecto';
+$string['default_coach_id_help'] = 'Entrenador asignado por defecto';

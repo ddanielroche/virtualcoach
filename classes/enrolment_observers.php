@@ -49,7 +49,7 @@ class enrolment_observers {
      * @throws Exception
      */
     public static function user_enrolment_created($event) {
-        return static::create_coach_assign($event->relateduserid, $event->courseid);
+        //return static::create_coach_assign($event->relateduserid, $event->courseid);
     }
 
     /**
@@ -59,14 +59,20 @@ class enrolment_observers {
      * @throws dml_exception
      * @throws moodle_exception
      */
-    public static function create_coach_assign($user, $course) {
+    public static function create_coach_assign($user, $course, $moduleinstance) {
         global $DB;
 
         if (!$DB->record_exists('coach_assign', ['course' => $course, 'userid' => $user])) {
             $coachAssign = new stdClass();
-            $coachAssign->coach = static::get_available_coach();
             $coachAssign->course = $course;
             $coachAssign->userid = $user;
+            if ($moduleinstance->default_coach_id == 0 && $coach = static::get_available_coach()) {
+                $coachAssign->coach = $coach->id;
+            } elseif ($moduleinstance->default_coach_id && static::is_available_coach($moduleinstance->default_coach_id)) {
+                $coachAssign->coach = $moduleinstance->default_coach_id;
+            } else {
+                return false;
+            }
 
             return $DB->insert_record('coach_assign', $coachAssign);
         }
@@ -87,10 +93,39 @@ RIGHT JOIN {coach} as coach on ca.coach = coach.id
 WHERE coach.active = 1
 GROUP BY coach.id
 ORDER BY count(ca.coach), coach.id',null, IGNORE_MULTIPLE);
-        if (!$coach)
-            throw new moodle_exception('coachnotavailable', 'virtualcoach');
 
-        return $coach->id;
+        return $coach;
+    }
+
+    /**
+     * @param $default_coach_id
+     * @return mixed
+     * @throws dml_exception
+     */
+    public static function is_available_coach($default_coach_id) {
+        global $DB;
+
+        return $DB->record_exists('coach',  ['id' => $default_coach_id, 'active' => 1]);
+    }
+
+    /**
+     * @return array
+     * @throws dml_exception
+     * @throws \coding_exception
+     */
+    public static function get_active_coaches()
+    {
+        global $DB;
+
+        $coaches = $DB->get_records('coach',  null, 'id ASC', 'id, name');
+
+        foreach ($coaches as $id => $coach) {
+            $coaches[$id] = $coach->name;
+        }
+
+        $coaches = array_merge(array(0 => get_string('autoassign', 'mod_virtualcoach')), $coaches);
+
+        return $coaches;
     }
 
     /**
@@ -105,38 +140,28 @@ ORDER BY count(ca.coach), coach.id',null, IGNORE_MULTIPLE);
         return $DB->get_record('coach_assign', ['userid' => $user, 'course' => $course], '*', IGNORE_MULTIPLE);
     }
 
-    public static function get_pool_name($user, $curse) {
+    /**
+     * @param $user
+     * @param $curse
+     * @param $moduleinstance
+     * @return mixed
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    public static function get_pool_name($user, $curse, $moduleinstance) {
         global $DB;
 
         /** @var object $coach_assign */
         if (!$coach_assign = static::get_coach_assign($user->id, $curse)) {
-            static::create_coach_assign($user->id, $curse);
-            $coach_assign = static::get_coach_assign($user->id, $curse);
+            if (static::create_coach_assign($user->id, $curse, $moduleinstance)) {
+                $coach_assign = static::get_coach_assign($user->id, $curse);
+            } else {
+                throw new moodle_exception('coachnotavailable', 'virtualcoach');
+            }
         }
 
         $coach = $DB->get_record('coach', ['id' => $coach_assign->coach], '*', MUST_EXIST);
         return $coach->pool;
-    }
-
-    /**
-     * @param $user
-     * @param $curse
-     * @return string
-     * @throws dml_exception
-     * @throws moodle_exception
-     */
-    public static function get_coach_link($user, $curse) {
-        global $DB;
-
-        /** @var object $coach_assign */
-        if (!$coach_assign = static::get_coach_assign($user->id, $curse)) {
-            static::create_coach_assign($user->id, $curse);
-            $coach_assign = static::get_coach_assign($user->id, $curse);
-        }
-
-        $coach = $DB->get_record('coach', ['id' => $coach_assign->coach], '*', MUST_EXIST);
-        $name = get_string('modulename', 'mod_virtualcoach');
-        return "<a href='rdp.php?username={$user->username}&machine={$coach->pool}'>$name</a>";
     }
 
     /**

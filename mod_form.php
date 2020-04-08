@@ -23,6 +23,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_virtualcoach\enrolment_observers;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
@@ -39,6 +41,7 @@ class mod_virtualcoach_mod_form extends moodleform_mod {
     /**
      * Defines forms elements
      * @throws coding_exception
+     * @throws dml_exception
      */
     public function definition() {
         global $CFG;
@@ -50,12 +53,6 @@ class mod_virtualcoach_mod_form extends moodleform_mod {
 
         // Adding the standard "name" field.
         $mform->addElement('text', 'name', get_string('virtualcoachname', 'mod_virtualcoach'), array('size' => '64'));
-
-        if (!empty($CFG->formatstringstriptags)) {
-            $mform->setType('name', PARAM_TEXT);
-        } else {
-            $mform->setType('name', PARAM_CLEANHTML);
-        }
 
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
@@ -73,9 +70,14 @@ class mod_virtualcoach_mod_form extends moodleform_mod {
         $mform->addElement('static', 'label1', 'virtualcoachsettings', get_string('virtualcoachsettings', 'mod_virtualcoach'));
         $mform->addElement('header', 'virtualcoachfieldset', get_string('virtualcoachfieldset', 'mod_virtualcoach'));
 
-        $mform->addElement('checkbox', 'autoassign', '&nbsp;', ' ' . get_string('autoassign', 'mod_virtualcoach'));
+        /*$mform->addElement('checkbox', 'autoassign', '&nbsp;', ' ' . get_string('autoassign', 'mod_virtualcoach'));
         $mform->setDefault('autoassign', true);
-        $mform->addHelpButton('autoassign', 'autoassign', 'mod_virtualcoach');
+        $mform->addHelpButton('autoassign', 'autoassign', 'mod_virtualcoach');*/
+
+        $coaches = enrolment_observers::get_active_coaches();
+        $mform->addElement('select', 'default_coach_id', get_string('default_coach_id', 'mod_virtualcoach'), $coaches);
+        $mform->setDefault('default_coach_id', true);
+        $mform->addHelpButton('default_coach_id', 'default_coach_id', 'mod_virtualcoach');
 
         $mform->addElement('text', 'max_hours', get_string('max_hours', 'mod_virtualcoach'));
         $mform->setDefault('max_hours', 30);
@@ -84,6 +86,18 @@ class mod_virtualcoach_mod_form extends moodleform_mod {
         $mform->addElement('text', 'max_days', get_string('max_days', 'mod_virtualcoach'));
         $mform->setDefault('max_days', 30);
         $mform->addHelpButton('max_days', 'max_days', 'mod_virtualcoach');
+
+        if (!empty($CFG->formatstringstriptags)) {
+            $mform->setType('name', PARAM_TEXT);
+            $mform->setType('default_coach_id', PARAM_TEXT);
+            $mform->setType('max_hours', PARAM_TEXT);
+            $mform->setType('max_days', PARAM_TEXT);
+        } else {
+            $mform->setType('name', PARAM_CLEANHTML);
+            $mform->setType('default_coach_id', PARAM_CLEANHTML);
+            $mform->setType('max_hours', PARAM_CLEANHTML);
+            $mform->setType('max_days', PARAM_CLEANHTML);
+        }
 
         // Add standard elements.
         $this->standard_coursemodule_elements();

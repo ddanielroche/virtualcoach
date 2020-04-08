@@ -46,3 +46,5 @@ $string['max_hours'] = 'Max Hours';
 $string['max_hours_help'] = 'Maximum number of hours to consume per user.';
 $string['max_days'] = 'Max Days';
 $string['max_days_help'] = 'Maximum number of days to consume per user.';
+$string['default_coach_id'] = 'Default Coach';
+$string['default_coach_id_help'] = 'Coach assigned vy default';
