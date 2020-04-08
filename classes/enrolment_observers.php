@@ -123,7 +123,7 @@ ORDER BY count(ca.coach), coach.id',null, IGNORE_MULTIPLE);
             $coaches[$coach->id] = $coach->name;
         }
 
-        $coaches = array_merge(array(0 => get_string('autoassign', 'mod_virtualcoach')), $coaches);
+        $coaches[0] = get_string('autoassign', 'mod_virtualcoach');
 
         return $coaches;
     }
