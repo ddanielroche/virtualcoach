@@ -119,8 +119,8 @@ ORDER BY count(ca.coach), coach.id',null, IGNORE_MULTIPLE);
 
         $coaches = $DB->get_records('coach',  null, 'id ASC', 'id, name');
 
-        foreach ($coaches as $id => $coach) {
-            $coaches[$id] = $coach->name;
+        foreach ($coaches as $coach) {
+            $coaches[$coach->id] = $coach->name;
         }
 
         $coaches = array_merge(array(0 => get_string('autoassign', 'mod_virtualcoach')), $coaches);
