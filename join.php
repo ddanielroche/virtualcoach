@@ -70,7 +70,7 @@ if ($arrayData = $mform->get_data()) {
 
         $pool = uds_servicespools_byname($broker, $poolName);
 
-        $ticketid = $mform->uds_user_tickets_create($broker, $USER->username, $arrayData->password, $pool->id,
+        $ticketid = $mform->uds_user_tickets_create($broker, $USER->username, $arrayData->password, $pool->id, $arrayData->transport,
             $USER->firstname . " " . $USER->lastname);
 
         uds_logout($broker);

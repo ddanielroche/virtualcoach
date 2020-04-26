@@ -54,6 +54,11 @@ class login_form extends moodleform {
         $mform->addRule('password', get_string('error'), 'required', 'extraruledata', 'client', true, false);
         //$mform->registerRule('checkpassword', 'check', 'required', 'extraruledata', 'client', true, false);
 
+        $transports = $this->transports();
+        if ($transports) {
+            $mform->addElement('select', 'transport', get_string('transport', 'mod_virtualcoach'), $transports);
+        }
+
         $this->add_action_buttons(false, get_string('login'));
     }
     //Custom validation should be added here
@@ -74,16 +79,45 @@ class login_form extends moodleform {
     }
 
     /**
+     * @param uds $udsinstance
+     * @return array|bool
+     * @throws coding_exception
+     */
+    public function transports()
+    {
+        $poolName = required_param('poolName', PARAM_TEXT);
+        /** @var uds $udsinstance */
+        $udsinstance = uds_login();
+        $pool = uds_servicespools_byname($udsinstance, $poolName);
+        if (!$pool->show_transports) {
+            return false;
+        }
+        $transports = $udsinstance->rest_request($udsinstance::GET, "servicespools/$pool->id/transports/overview", '');
+        $results = array();
+        foreach ($transports as $transport) {
+            $results[$transport->priority] = ['id' => $transport->id, 'name' => $transport->name];
+        }
+        ksort($results);
+        foreach ($results as $id => $result) {
+            unset($results[$id]);
+            $results[$result['id']] = $result['name'];
+        }
+        return $results;
+    }
+
+    /**
      * Create ticket from user
      *
      * @param uds $udsinstance
      * @param string $username
+     * @param $password
      * @param string $idpool
+     * @param $transport
      * @param string $fullname
      * @return string
      * @throws coding_exception
      */
-    public function uds_user_tickets_create($udsinstance, $username, $password, $idpool, $fullname) {
+    public function uds_user_tickets_create($udsinstance, $username, $password, $idpool, $transport, $fullname) {
 
         global $CFG, $COURSE;
 
@@ -95,8 +129,10 @@ class login_form extends moodleform {
             "authSmallName" => $udsinstance->get_authsmallnameforactivity(),
             "groups" => $udsinstance->get_groupname(),
             "servicePool" => "$idpool",
+            "transport" => $transport,
             "realname" => "$fullname",
-            "force" => "1");
+            "force" => "1",
+        );
 
         $jsonresponse = $udsinstance->rest_request($udsinstance::PUT,
             $urlpath, $postfields);
