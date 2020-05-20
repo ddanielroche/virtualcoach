@@ -41,6 +41,7 @@ function xmldb_virtualcoach_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     $virtualcoach = $dbman->get_install_xml_schema()->getTable('virtualcoach');
+    $coach = $dbman->get_install_xml_schema()->getTable('coach');
 
     if ($oldversion < 2019120408) {
         $dbman->add_field($virtualcoach, new xmldb_field(
@@ -81,6 +82,18 @@ function xmldb_virtualcoach_upgrade($oldversion) {
             array('default_coach_id'),
             'coach',
             array('id')
+        ));
+    }
+
+    if ($oldversion < 2020052001) {
+        $dbman->add_field($coach, new xmldb_field(
+            'computer',
+            XMLDB_TYPE_CHAR,
+            '255',
+            null,
+            null,
+            null,
+            null
         ));
     }
 

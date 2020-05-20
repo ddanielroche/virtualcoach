@@ -58,6 +58,8 @@ class calendar {
             return false;
         }
 
+        // TODO implement as a service
+        $logout =  __DIR__ . '/../cli/logoff.ps1';
         $events = static::readEvents($allow);
         $ldapConnection = $auth->ldap_connect();
         foreach ($events as $event) {
@@ -73,6 +75,15 @@ class calendar {
             } elseif (!$allow && $isgroupmember) {
                 echo "ldap_md $event->group $event->username\n\n";
                 ldap_mod_del( $ldapConnection, $event->group, [$auth->config->memberattribute => $userid]);
+                // TODO implement as a service
+                $cmd = "powershell msg $extusername /server:$event->computer !Su sesión está a punto de finalizar, dispone de 5 minutos para guardar su trabajo!";
+                echo $cmd . "\n";
+                exec($cmd);
+            } elseif (!$allow && !$isgroupmember) {
+                // TODO implement as a service
+                $cmd = "powershell $logout -server $event->computer -username $extusername";
+                echo $cmd . "\n";
+                exec($cmd);
             }
         }
         $auth->ldap_close();
@@ -94,7 +105,7 @@ class calendar {
         global $DB;
 
         $time = time();
-        $sql = "SELECT  e.id, c.group, u.username
+        $sql = "SELECT  e.id, c.group, u.username, c.computer
 FROM {event} e
 INNER JOIN {user} u ON u.id = e.userid
 INNER JOIN {coach_assign} ca ON ca.userid = u.id and ca.course = e.courseid

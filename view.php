@@ -151,13 +151,53 @@ $bc->title = get_string('modulename', 'virtualpc');
 echo $OUTPUT->block($bc, BLOCK_POS_LEFT);
 //echo enrolment_observers::get_coach_link($USER, $courseid);
 
-/*list($data, $template) = calendar_get_view($calendar, $view);
+list($data, $template) = calendar_get_view($calendar, $view);
 echo $renderer->render_from_template($template, $data);
 
 echo html_writer::end_tag('div');
 
 list($data, $template) = calendar_get_footer_options($calendar);
-echo $renderer->render_from_template($template, $data);*/
+echo $renderer->render_from_template($template, $data);
 
 echo $renderer->complete_layout();
 echo $OUTPUT->footer();
+
+?>
+
+<script type="text/javascript">
+    require (['jquery'], function ($) {
+        $(document).ready(function() {
+            document.body.addEventListener('DOMNodeInserted', function( event ) {
+                if (event.target.classList && event.target.classList.contains('moreless-actions')) {
+                    $('.fitem.moreless-actions').css('display', 'none');
+                }
+
+                /*if (event.target.classList && event.target.classList.contains('editor_atto_content')) {
+                    console.log(event.target);
+                    var x = document.createElement("P");
+                    var t = document.createTextNode("Reserva de horas en entrenador.");
+                    x.appendChild(t);
+                    $('#id_descriptioneditable')[0].appendChild(x);
+                }*/
+
+                if (event.target.tagName == "FORM") {
+                    $('#fitem_id_name').css('display', 'none');
+                    $('#id_name').val('<?= $USER->firstname . ' ' . $USER->lastname ?>');
+
+
+                    $('#fitem_id_eventtype').css('display', 'none');
+                    $('#fitem_id_courseid').css('display', 'none');
+                    //$('#fitem_id_description').css('display', 'none');
+                    $('#fitem_id_location').css('display', 'none');
+                    $('#fitem_id_repeats').css('display', 'none');
+                    $('.fdescription.required').css('display', 'none');
+                    $('#fgroup_id_durationgroup')[0].classList.remove('advanced');
+
+                    $('#id_duration_0').prop('disabled', true);
+                    $('#id_duration_2').click();
+                    $('#id_timedurationminutes').val(60);
+                }
+            }, false);
+        });
+    });
+</script>
