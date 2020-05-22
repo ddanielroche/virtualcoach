@@ -50,6 +50,6 @@ class send_end_of_session_message extends scheduled_task {
      * @throws dml_exception
      */
     public function execute() {
-        calendar::allow_coach_access(false);
+        calendar::allow_coach_access(calendar::SEND_MSG);
     }
 }

@@ -42,13 +42,16 @@ require_once($CFG->libdir.'/ldaplib.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class calendar {
+    const ALLOW_ACCESS = 1;
+    const SEND_MSG = 2;
+    const DENY_ACCESS = 3;
 
     /**
-     * @param bool $allow
+     * @param int $allow
      * @return bool
      * @throws dml_exception
      */
-    public static function allow_coach_access($allow = true) {
+    public static function allow_coach_access($allow) {
         if (!is_enabled_auth('ldap')) {
             return false;
         }
@@ -67,19 +70,19 @@ class calendar {
             if(!($userid = $auth->ldap_find_userdn($ldapConnection, $extusername))) {
                 continue;
             }
-            echo "\nldap_isgm - ";
+            echo "\nldap_isgroupmember - ";
             $isgroupmember = ldap_isgroupmember($ldapConnection, $userid, [$event->group], $auth->config->memberattribute);
-            if ($allow && !$isgroupmember) {
-                echo "ldap_ma $event->group $event->username\n\n";
+            if ($allow == self::ALLOW_ACCESS && !$isgroupmember) {
+                echo "ldap_mod_add $event->group $event->username\n\n";
                 ldap_mod_add($ldapConnection, $event->group, [$auth->config->memberattribute => $userid]);
-            } elseif (!$allow && $isgroupmember) {
-                echo "ldap_md $event->group $event->username\n\n";
+            } elseif ($allow == self::SEND_MSG && $isgroupmember) {
+                echo "ldap_mod_del $event->group $event->username\n\n";
                 ldap_mod_del( $ldapConnection, $event->group, [$auth->config->memberattribute => $userid]);
                 // TODO implement as a service
                 $cmd = "powershell msg $extusername /server:$event->computer !Su sesión está a punto de finalizar, dispone de 5 minutos para guardar su trabajo!";
                 echo $cmd . "\n";
                 exec($cmd);
-            } elseif (!$allow && !$isgroupmember) {
+            } elseif ($allow == self::DENY_ACCESS) {
                 // TODO implement as a service
                 $cmd = "powershell $logout -server $event->computer -username $extusername";
                 echo $cmd . "\n";
@@ -111,10 +114,12 @@ INNER JOIN {user} u ON u.id = e.userid
 INNER JOIN {coach_assign} ca ON ca.userid = u.id and ca.course = e.courseid
 INNER JOIN {coach} c ON c.id = ca.coach
 WHERE u.auth = 'ldap' AND";
-        if ($allow) {
+        if ($allow == self::ALLOW_ACCESS) {
             $sql .= " $time BETWEEN e.timestart AND e.timestart + e.timeduration\n";
-        } else {
-            $sql .= " (e.timestart + e.timeduration - $time) BETWEEN 0 and 10 * 60\n";
+        } elseif ($allow == self::SEND_MSG) {
+            $sql .= " (e.timestart + e.timeduration - $time) BETWEEN 0 and 600\n";
+        } elseif ($allow == self::DENY_ACCESS) {
+            $sql .= " (e.timestart + e.timeduration - $time) BETWEEN 0 and 300\n";
         }
         $sql .= "ORDER BY e.id\n";
         echo $sql;

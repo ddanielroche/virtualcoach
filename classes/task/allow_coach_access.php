@@ -50,6 +50,6 @@ class allow_coach_access extends scheduled_task {
      * @throws dml_exception
      */
     public function execute() {
-        calendar::allow_coach_access();
+        calendar::allow_coach_access(calendar::ALLOW_ACCESS);
     }
 }
