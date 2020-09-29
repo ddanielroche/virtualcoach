@@ -87,7 +87,7 @@ class login_form extends moodleform {
     {
         $poolName = required_param('poolName', PARAM_TEXT);
         /** @var uds $udsinstance */
-        $udsinstance = uds_login();
+        $udsinstance = my_uds_login();
         $pool = uds_servicespools_byname($udsinstance, $poolName);
         if (!$pool->show_transports) {
             return false;
@@ -103,50 +103,5 @@ class login_form extends moodleform {
             $results[$result['id']] = $result['name'];
         }
         return $results;
-    }
-
-    /**
-     * Create ticket from user
-     *
-     * @param uds $udsinstance
-     * @param string $username
-     * @param $password
-     * @param string $idpool
-     * @param $transport
-     * @param string $fullname
-     * @return string
-     * @throws coding_exception
-     */
-    public function uds_user_tickets_create($udsinstance, $username, $password, $idpool, $transport, $fullname) {
-
-        global $CFG, $COURSE;
-
-        $urlpath = '/tickets/create';
-
-        $postfields = array(
-            "username" => "$username",
-            "password" => "$password",
-            "authSmallName" => $udsinstance->get_authsmallnameforactivity(),
-            "groups" => $udsinstance->get_groupname(),
-            "servicePool" => "$idpool",
-            "transport" => $transport,
-            "realname" => "$fullname",
-            "force" => "1",
-        );
-
-        $jsonresponse = $udsinstance->rest_request($udsinstance::PUT,
-            $urlpath, $postfields);
-        //print_r($jsonresponse);exit;
-        if (empty($jsonresponse->result)) {
-            $feedback = new stdClass();
-            $pool = uds_servicespools($udsinstance, $idpool);
-            $feedback->poolname = $pool->name;
-            $feedback->username = "$username";
-            notice(get_string('virtualpcerrorcreatingticketid', 'virtualpc', $feedback),
-                $CFG->wwwroot . '/course/view.php?id=' . $COURSE->id);
-            return null;
-        } else {
-            return $jsonresponse->result;
-        }
     }
 }

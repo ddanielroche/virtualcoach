@@ -33,7 +33,7 @@ require_once($CFG->dirroot.'/calendar/lib.php');
 // Code copy from Virtual PC View
 require_once(dirname(__FILE__) .'/../virtualpc/lib.php');
 require_once(dirname(__FILE__).'/../virtualpc/locallib.php');
-require_once(dirname(__FILE__).'/../virtualpc/uds_class.php');
+require_once(__DIR__.'/uds_class.php');
 
 // Course_module ID, or
 $id = optional_param('id', 0, PARAM_INT);
@@ -131,7 +131,7 @@ echo html_writer::start_tag('div', array('class'=>'heightcontainer'));
 
 // TODO review course param array($USER->id, 2)
 
-$broker = uds_login();
+$broker = my_uds_login();
 $pool = uds_servicespools_byname($broker, enrolment_observers::get_pool_name($USER, $courseid, $moduleinstance));
 
 if ($pool) {

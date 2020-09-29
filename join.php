@@ -25,7 +25,7 @@
  */
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once(dirname(dirname(__FILE__)).'/virtualpc/uds_class.php');
+require_once(__DIR__.'/uds_class.php');
 require_once(dirname(dirname(__FILE__)).'/virtualpc/locallib.php');
 require_once(__DIR__.'/login_form.php');
 
@@ -65,12 +65,11 @@ $mform = new login_form($loginURL);
 if ($arrayData = $mform->get_data()) {
 
     if (has_capability('mod/virtualpc:join', $context) && confirm_sesskey($sesskey)) {
-
-        $broker = uds_login();
-
+        $broker = my_uds_login();
+        delete_last_login_users($broker);
         $pool = uds_servicespools_byname($broker, $poolName);
 
-        $ticketid = $mform->uds_user_tickets_create($broker, $USER->username, $arrayData->password, $pool->id, $arrayData->transport,
+        $ticketid = uds_user_tickets_create($broker, $USER->username, $arrayData->password, $pool->id, $arrayData->transport,
             $USER->firstname . " " . $USER->lastname);
 
         uds_logout($broker);
