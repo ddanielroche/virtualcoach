@@ -26,6 +26,7 @@
 namespace mod_virtualcoach;
 
 use core\event\base;
+use core_user\search\user;
 use dml_exception;
 use Exception;
 use moodle_exception;
@@ -138,6 +139,28 @@ ORDER BY count(ca.coach), coach.id',null, IGNORE_MULTIPLE);
         global $DB;
 
         return $DB->get_record('coach_assign', ['userid' => $user, 'course' => $course], '*', IGNORE_MULTIPLE);
+    }
+
+    /**
+     * @param int $user
+     * @param int $course
+     * @return mixed
+     * @throws dml_exception
+     */
+    public static function get_coaches_assign($user, $course) {
+        global $DB;
+
+        $coaches = $DB->get_records_sql("SELECT coach.id, coach.name
+FROM {coach} as coach
+INNER JOIN {coach_assign} as ca on ca.coach = coach.id
+WHERE coach.active = 1 AND ca.userid = $user AND ca.course = $course
+ORDER BY coach.id");
+
+        foreach ($coaches as $coach) {
+            $coaches[$coach->id] = $coach->name;
+        }
+
+        return $coaches;
     }
 
     /**

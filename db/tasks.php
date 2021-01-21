@@ -29,7 +29,7 @@ $tasks = array(
     array(
         'classname' => '\mod_virtualcoach\task\allow_coach_access',
         'blocking' => 0,
-        'minute' => '*/5',
+        'minute' => '*',
         'hour' => '*',
         'day' => '*',
         'month' => '*',
@@ -39,7 +39,7 @@ $tasks = array(
     array(
         'classname' => '\mod_virtualcoach\task\send_end_of_session_message',
         'blocking' => 0,
-        'minute' => '*/5',
+        'minute' => '*',
         'hour' => '*',
         'day' => '*',
         'month' => '*',
@@ -49,7 +49,7 @@ $tasks = array(
     array(
         'classname' => '\mod_virtualcoach\task\deny_coach_access',
         'blocking' => 0,
-        'minute' => '*/5',
+        'minute' => '*',
         'hour' => '*',
         'day' => '*',
         'month' => '*',

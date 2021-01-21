@@ -14,6 +14,8 @@
         <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Activity description."/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The format of the intro field."/>
         <FIELD NAME="autoassign" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Enable auto assign virtual coach to student in course"/>
+        <FIELD NAME="max_daily_hours" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="3" SEQUENCE="false" COMMENT="Maximum number of hours to consume daily per user"/>
+        <FIELD NAME="max_weekly_hours" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="21" SEQUENCE="false" COMMENT="Maximum number of hours to consume weekly per user"/>
         <FIELD NAME="max_hours" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="30" SEQUENCE="false" COMMENT="Maximum number of hours to consume per user"/>
         <FIELD NAME="max_days" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="90" SEQUENCE="false" COMMENT="Maximum number of days to consume per user"/>
         <FIELD NAME="default_coach_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Default coach if autoassign is false"/>

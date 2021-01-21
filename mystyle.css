@@ -1,8 +1,68 @@
-.path-calendar .maincalendar, .calendarmonth {
-    width: 98%;
-    margin: 10px auto
+/* theme/boost/style/moodle.css */
+
+.path-calendar .calendartable {
+    table-layout: fixed;
 }
-.next {
-    text-align: right;
-    border: 1px solid transparent;
+
+.path-calendar .maincalendar .calendartable th,
+.path-calendar .maincalendar .calendartable td,
+.path-calendar .maincalendar .calendartable li {
+    padding: 0 4px 4px 4px;
+}
+
+.path-calendar .calendartable th,
+.path-calendar .calendartable td {
+    width: 14%;
+}
+
+.maincalendar .calendarmonth .x_hour {
+    border: 1px solid #1177d1;
+    width: 3em;
+}
+
+.path-calendar .maincalendar .calendarmonth td {
+    height: 1em;
+}
+
+.path-calendar .maincalendar .calendarmonth thead {
+    background-color: #ffffff;
+}
+
+.path-calendar .maincalendar .calendarmonth .hours:hover .calendar_event_before,
+.path-calendar .maincalendar .calendarmonth .hours:hover {
+    background-color: #1177d1;
+    color: #f2f2f2;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+}
+
+.path-calendar .maincalendar .calendarmonth .hours:hover a {
+    color: #f2f2f2;
+}
+
+.maincalendar .calendarmonth th {
+    border: 1px solid #1177d1;
+}
+
+.maincalendar .calendarmonth td {
+    border: 1px dotted #1177d1;
+}
+
+.calendar_event_before {
+    background-color: #f2f2f2;
+}
+
+.calendar_event_my {
+    background-color: #1177d1;
+}
+
+.calendar_event_others {
+    background-color: #d8bfd8;
+}
+
+.path-calendar .maincalendar .calendarmonth ul li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    display: inline-block;
 }

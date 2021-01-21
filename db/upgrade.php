@@ -97,6 +97,35 @@ function xmldb_virtualcoach_upgrade($oldversion) {
         ));
     }
 
+    if ($oldversion < 2020123102) {
+        $dbman->add_field($virtualcoach, new xmldb_field(
+            'max_daily_hours',
+            XMLDB_TYPE_INTEGER,
+            '8',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            3
+        ));
+    }
+
+    if ($oldversion < 2021010400) {
+        $dbman->add_field($virtualcoach, new xmldb_field(
+            'max_weekly_hours',
+            XMLDB_TYPE_INTEGER,
+            '8',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            21
+        ));
+    }
+
+    if ($oldversion < 2021011300) {
+        $max_hours = $virtualcoach->getField('max_hours');
+        $dbman->rename_field($virtualcoach, $max_hours, 'max_course_hours');
+    }
+
     // For further information please read the Upgrade API documentation:
     // https://docs.moodle.org/dev/Upgrade_API
     //

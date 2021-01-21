@@ -107,22 +107,24 @@ class calendar {
     {
         global $DB;
 
+        $location = $DB->sql_cast_char2int('e.location');
+        $locationIsNotEmpty = $DB->sql_isnotempty('event', 'e.location', true, true);
+
         $time = time();
         $sql = "SELECT  e.id, c.group, u.username, c.computer
 FROM {event} e
 INNER JOIN {user} u ON u.id = e.userid
-INNER JOIN {coach_assign} ca ON ca.userid = u.id and ca.course = e.courseid
-INNER JOIN {coach} c ON c.id = ca.coach
-WHERE u.auth = 'ldap' AND";
+INNER JOIN {coach} c ON c.id = $location
+WHERE u.auth = 'ldap' AND e.eventtype 'virtualcoach' AND $locationIsNotEmpty AND";
         if ($allow == self::ALLOW_ACCESS) {
             $sql .= " $time BETWEEN e.timestart AND e.timestart + e.timeduration\n";
         } elseif ($allow == self::SEND_MSG) {
-            $sql .= " (e.timestart + e.timeduration - $time) BETWEEN 0 and 600\n";
-        } elseif ($allow == self::DENY_ACCESS) {
             $sql .= " (e.timestart + e.timeduration - $time) BETWEEN 0 and 300\n";
+        } elseif ($allow == self::DENY_ACCESS) {
+            $sql .= " (e.timestart + e.timeduration - $time) BETWEEN -120 and 0\n";
         }
         $sql .= "ORDER BY e.id\n";
-        echo $sql;
+        //echo $sql;
 
         return $DB->get_records_sql($sql);
     }

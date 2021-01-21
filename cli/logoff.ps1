@@ -1,10 +1,19 @@
 param(
-[Parameter(Mandatory=$true)][string]$server = "a",
-[Parameter(Mandatory=$true)][string]$username = "b"
+	[Parameter(Mandatory=$true)][string]$server = "a",
+	[Parameter(Mandatory=$true)][string]$username = "b"
 )
 
-$rdp = $(qwinsta /server:$server $username | Select-String -Pattern 'rdp')
-if ($rdp) {
-	$rdp = $($rdp -replace '\s+', ' ').split()[1]
-	rwinsta $rdp /server:$server
+$result = qwinsta /server:$server $username
+Write-Output $result
+ForEach($line in $result[1..$result.Count]) {
+	# Close Active User Session
+	if ($line[48] -eq "A") {
+		$sessionID = $( $line -replace '\s+', ' ' ).split()[3]
+		rwinsta $sessionID /server:$server
+	}
+	# Close Disconnected User Session
+	elseif ($line[48] -eq "D") {
+		$sessionID = $( $line -replace '\s+', ' ' ).split()[2]
+		rwinsta $sessionID /server:$server
+	}
 }

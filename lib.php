@@ -123,3 +123,156 @@ function virtualcoach_extend_navigation($virtualcoachnode, $course, $module, $cm
  */
 function virtualcoach_extend_settings_navigation($settingsnav, $virtualcoachnode = null) {
 }
+
+/**
+ * Request and render event form fragment.
+ *
+ * @param array $args The fragment arguments.
+ * @return string The rendered mform fragment.
+ */
+function mod_virtualcoach_output_fragment_event_form($args) {
+    global $CFG, $OUTPUT, $USER;
+    require_once($CFG->libdir . '/grouplib.php');
+    $html = '';
+    $data = [];
+    $eventid = isset($args['eventid']) ? clean_param($args['eventid'], PARAM_INT) : null;
+    $starttime = isset($args['starttime']) ? clean_param($args['starttime'], PARAM_INT) : null;
+    $courseid = (isset($args['courseid']) && $args['courseid'] != SITEID) ? clean_param($args['courseid'], PARAM_INT) : null;
+    $categoryid = isset($args['categoryid']) ? clean_param($args['categoryid'], PARAM_INT) : null;
+    $location = isset($args['location']) ? clean_param($args['location'], PARAM_INT) : null;
+    $event = null;
+    $hasformdata = isset($args['formdata']) && !empty($args['formdata']);
+    $context = \context_user::instance($USER->id);
+    $editoroptions = mod_virtualcoach\event\forms\create::build_editor_options($context);
+    $formoptions = ['editoroptions' => $editoroptions, 'courseid' => $courseid];
+    $draftitemid = 0;
+
+    if ($hasformdata) {
+        parse_str(clean_param($args['formdata'], PARAM_TEXT), $data);
+        if (isset($data['description']['itemid'])) {
+            $draftitemid = $data['description']['itemid'];
+        }
+    }
+
+    if ($starttime) {
+        $formoptions['starttime'] = $starttime;
+    }
+
+    if (is_null($eventid)) {
+        if (!empty($courseid)) {
+            $groupcoursedata = groups_get_course_data($courseid);
+            $formoptions['groups'] = [];
+            foreach ($groupcoursedata->groups as $groupid => $groupdata) {
+                $formoptions['groups'][$groupid] = $groupdata->name;
+            }
+        }
+        $mform = new mod_virtualcoach\event\forms\create(
+            null,
+            $formoptions,
+            'post',
+            '',
+            null,
+            true,
+            $data
+        );
+
+        // Let's check first which event types user can add.
+        $eventtypes = calendar_get_allowed_event_types($courseid);
+
+        // If the user is on course context and is allowed to add course events set the event type default to course.
+        /*if (!empty($courseid) && !empty($eventtypes['course'])) {
+            $data['eventtype'] = 'course';
+            $data['courseid'] = $courseid;
+            $data['groupcourseid'] = $courseid;
+        } else if (!empty($categoryid) && !empty($eventtypes['category'])) {
+            $data['eventtype'] = 'category';
+            $data['categoryid'] = $categoryid;
+        } else if (!empty($groupcoursedata) && !empty($eventtypes['group'])) {
+            $data['groupcourseid'] = $courseid;
+            $data['groups'] = $groupcoursedata->groups;
+        }*/
+        $data['location'] = $location;
+        $data['courseid'] = $courseid;
+
+        $cm = get_coursemodule_from_id('virtualcoach', $args['moduleid'], 0, false, MUST_EXIST);
+        $data['instance'] = $cm->instance;
+
+        $mform->set_data($data);
+    } else {
+        $event = calendar_event::load($eventid);
+
+        if (!calendar_edit_event_allowed($event)) {
+            print_error('nopermissiontoupdatecalendar');
+        }
+
+        $mapper = new \core_calendar\local\event\mappers\create_update_form_mapper();
+        $eventdata = $mapper->from_legacy_event_to_data($event);
+        $data = array_merge((array) $eventdata, $data);
+
+        $data['duration'] = 2;
+        if (!$data['timedurationminutes']) {
+            $data['timedurationminutes'] = (int)(($event->properties()->timeduration+1)/60);
+        }
+
+        $event->count_repeats();
+        $formoptions['event'] = $event;
+
+        if (!empty($event->courseid)) {
+            $groupcoursedata = groups_get_course_data($event->courseid);
+            $formoptions['groups'] = [];
+            foreach ($groupcoursedata->groups as $groupid => $groupdata) {
+                $formoptions['groups'][$groupid] = $groupdata->name;
+            }
+        }
+
+        $data['description']['text'] = file_prepare_draft_area(
+            $draftitemid,
+            $event->context->id,
+            'calendar',
+            'event_description',
+            $event->id,
+            null,
+            $data['description']['text']
+        );
+        $data['description']['itemid'] = $draftitemid;
+
+        /*$mform = new \core_calendar\local\event\forms\update(
+            null,
+            $formoptions,
+            'post',
+            '',
+            null,
+            true,
+            $data
+        );*/
+
+        $mform = new mod_virtualcoach\event\forms\create(
+            null,
+            $formoptions,
+            'post',
+            '',
+            null,
+            true,
+            $data
+        );
+        $mform->set_data($data);
+
+        // Check to see if this event is part of a subscription or import.
+        // If so display a warning on edit.
+        if (isset($event->subscriptionid) && ($event->subscriptionid != null)) {
+            $renderable = new \core\output\notification(
+                get_string('eventsubscriptioneditwarning', 'calendar'),
+                \core\output\notification::NOTIFY_INFO
+            );
+
+            $html .= $OUTPUT->render($renderable);
+        }
+    }
+
+    if ($hasformdata) {
+        $mform->is_validated();
+    }
+
+    $html .= $mform->render();
+    return $html;
+}

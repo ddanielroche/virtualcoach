@@ -39,12 +39,4 @@ $observers = array(
         'eventname' => '\core\event\user_enrolment_deleted',
         'callback' => '\mod_virtualcoach\enrolment_observers::user_enrolment_deleted',
     ),
-    array(
-        'eventname' => '\core\event\calendar_event_created',
-        'callback' => '\mod_virtualcoach\calendar_event_observers::calendar_event_created',
-    ),
-    array(
-        'eventname' => '\core\event\calendar_event_updated',
-        'callback' => '\mod_virtualcoach\calendar_event_observers::calendar_event_updated',
-    ),
 );

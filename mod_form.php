@@ -79,24 +79,36 @@ class mod_virtualcoach_mod_form extends moodleform_mod {
         $mform->setDefault('default_coach_id', true);
         $mform->addHelpButton('default_coach_id', 'default_coach_id', 'mod_virtualcoach');
 
-        $mform->addElement('text', 'max_hours', get_string('max_hours', 'mod_virtualcoach'));
-        $mform->setDefault('max_hours', 30);
-        $mform->addHelpButton('max_hours', 'max_hours', 'mod_virtualcoach');
+        $mform->addElement('text', 'max_daily_hours', get_string('max_daily_hours', 'mod_virtualcoach'));
+        $mform->setDefault('max_daily_hours', 3);
+        $mform->addHelpButton('max_daily_hours', 'max_daily_hours', 'mod_virtualcoach');
 
-        $mform->addElement('text', 'max_days', get_string('max_days', 'mod_virtualcoach'));
+        $mform->addElement('text', 'max_weekly_hours', get_string('max_weekly_hours', 'mod_virtualcoach'));
+        $mform->setDefault('max_weekly_hours', 21);
+        $mform->addHelpButton('max_weekly_hours', 'max_weekly_hours', 'mod_virtualcoach');
+
+        $mform->addElement('text', 'max_course_hours', get_string('max_course_hours', 'mod_virtualcoach'));
+        $mform->setDefault('max_course_hours', 30);
+        $mform->addHelpButton('max_course_hours', 'max_course_hours', 'mod_virtualcoach');
+
+        /*$mform->addElement('text', 'max_days', get_string('max_days', 'mod_virtualcoach'));
         $mform->setDefault('max_days', 30);
-        $mform->addHelpButton('max_days', 'max_days', 'mod_virtualcoach');
+        $mform->addHelpButton('max_days', 'max_days', 'mod_virtualcoach');*/
 
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
             $mform->setType('default_coach_id', PARAM_TEXT);
-            $mform->setType('max_hours', PARAM_TEXT);
+            $mform->setType('max_daily_hours', PARAM_TEXT);
+            $mform->setType('max_weekly_hours', PARAM_TEXT);
+            $mform->setType('max_course_hours', PARAM_TEXT);
             $mform->setType('max_days', PARAM_TEXT);
         } else {
             $mform->setType('name', PARAM_CLEANHTML);
             $mform->setType('default_coach_id', PARAM_CLEANHTML);
-            $mform->setType('max_hours', PARAM_CLEANHTML);
-            $mform->setType('max_days', PARAM_CLEANHTML);
+            $mform->setType('max_daily_hours', PARAM_CLEANHTML);
+            $mform->setType('max_weekly_hours', PARAM_CLEANHTML);
+            $mform->setType('max_course_hours', PARAM_CLEANHTML);
+            //$mform->setType('max_days', PARAM_CLEANHTML);
         }
 
         // Add standard elements.
