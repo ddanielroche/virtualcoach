@@ -38,8 +38,8 @@ define(['jquery', 'core/ajax'], function($, Ajax) {
      * @param {Number} moduleId The id of the module in the course
      * @return {promise} Resolved with the day view data.
      */
-    let getCalendarWeekData = function (year, month, day, courseId, categoryId, coachId, moduleId) {
-        let request = {
+    var getCalendarWeekData = function (year, month, day, courseId, categoryId, coachId, moduleId) {
+        var request = {
             methodname: 'mod_virtualcoach_get_calendar_weekly_view',
             args: {
                 year: year,

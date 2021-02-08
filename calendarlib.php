@@ -37,7 +37,8 @@ function calendar_get_week_view(calendar_information $calendar, string $view, in
     $calendar_date = $type->timestamp_to_date_array($calendar->time);
 
     $date = new DateTime('now', core_date::get_user_timezone_object(99));
-    $event_limit = 0;
+    // TODO Revisar implementación por valores exedidos
+    $event_limit = 199;
 
 
     $ts_tart = $type->convert_to_timestamp($calendar_date['year'], $calendar_date['mon'], 1);
@@ -297,7 +298,8 @@ function get_events($time_start, $time_end, $location)
         null,
         null,
         null,
-        1000,
+        // TODO Revisar implementación por valores exedidos
+        199,
         null,
         null,
         null,

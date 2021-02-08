@@ -37,7 +37,7 @@ define([
     Notification,
     CalendarEvents,
     CalendarSelectors,
-    VirtualCoachCalendarRepository,
+    VirtualCoachCalendarRepository
 ) {
 
     var SELECTORS = {
@@ -53,7 +53,7 @@ define([
         root = $(root);
 
         root.on('click', CalendarSelectors.links.navLink, function (e) {
-            let wrapper = root.find(CalendarSelectors.wrapper),
+            var wrapper = root.find(CalendarSelectors.wrapper),
                 view = wrapper.data('view'),
                 courseId = wrapper.data('courseid'),
                 categoryId = wrapper.data('categoryId'),
@@ -81,7 +81,7 @@ define([
                 .fail(Notification.exception);
         });
 
-        let body = $('body');
+        var body = $('body');
 
         body.off(CalendarEvents.created);
         body.on(CalendarEvents.created, function() {
@@ -152,13 +152,13 @@ define([
      * @return {promise}
      */
     reloadCurrentWeek = function(root, coachId, categoryId) {
-        let wrapper = root.find(CalendarSelectors.wrapper),
+        var wrapper = root.find(CalendarSelectors.wrapper),
             year = wrapper.data('year'),
             month = wrapper.data('month'),
             day = wrapper.data('day'),
             moduleId = wrapper.data('module-id');
 
-        let courseId = root.find(CalendarSelectors.wrapper).data('courseid');
+        var courseId = root.find(CalendarSelectors.wrapper).data('courseid');
 
         if (typeof coachId === 'undefined') {
             coachId = $(SELECTORS.COACH_SELECTOR).val();
@@ -186,7 +186,7 @@ define([
      * @return {promise}
      */
     changeWeek = function(root, url, year, month, day, courseId, categoryId, coachId, moduleId) {
-        console.log([url, year, month, day, courseId, categoryId, coachId, moduleId]);
+        //console.log([url, year, month, day, courseId, categoryId, coachId, moduleId]);
         return refreshWeekContent(root, year, month, day, courseId, categoryId, coachId, moduleId, null)
             .then(function() {
                 if (url.length && url !== '#') {
@@ -207,7 +207,7 @@ define([
      * @method startLoading
      */
     startLoading = function(root) {
-        let loadingIconContainer = root.find(CalendarSelectors.containers.loadingIcon);
+        var loadingIconContainer = root.find(CalendarSelectors.containers.loadingIcon);
 
         loadingIconContainer.removeClass('hidden');
     },
@@ -219,7 +219,7 @@ define([
      * @method stopLoading
      */
     stopLoading = function(root) {
-        let loadingIconContainer = root.find(CalendarSelectors.containers.loadingIcon);
+        var loadingIconContainer = root.find(CalendarSelectors.containers.loadingIcon);
 
         loadingIconContainer.addClass('hidden');
     };
