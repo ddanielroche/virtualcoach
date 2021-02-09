@@ -24,21 +24,156 @@
  */
 define([
     'jquery',
+    'core/ajax',
+    'core/fragment',
     'core/templates',
     'core/str',
     'core/notification',
     'core_calendar/events',
+    'core_calendar/modal_event_form',
     'core_calendar/selectors',
+    'core_calendar/repository',
     'mod_virtualcoach/repository',
 ], function(
     $,
+    Ajax,
+    Fragment,
     Templates,
     Str,
     Notification,
     CalendarEvents,
+    ModalEventForm,
     CalendarSelectors,
+    CalendarRepository,
     VirtualCoachCalendarRepository
 ) {
+
+    /**
+     * Send a request to the server to get the event_form in a fragment
+     * and render the result in the body of the modal.
+     *
+     * If serialised form data is provided then it will be sent in the
+     * request to the server to have the form rendered with the data. This
+     * is used when the form had a server side error and we need the server
+     * to re-render it for us to display the error to the user.
+     *
+     * @method reloadBodyContent
+     * @param {string} formData The serialised form data
+     * @return {object} A promise resolved with the fragment html and js from
+     */
+    ModalEventForm.prototype.reloadBodyContent = function(formData) {
+        if (this.reloadingBody) {
+            return this.bodyPromise;
+        }
+
+        this.reloadingBody = true;
+        this.disableButtons();
+
+        var args = {};
+
+        if (this.hasEventId()) {
+            args.eventid = this.getEventId();
+        }
+
+        if (this.hasStartTime()) {
+            args.starttime = this.getStartTime();
+        }
+
+        if (this.hasCourseId()) {
+            args.courseid = this.getCourseId();
+        }
+
+        if (this.hasCategoryId()) {
+            args.categoryid = this.getCategoryId();
+        }
+
+        if (typeof formData !== 'undefined') {
+            args.formdata = formData;
+        }
+
+        args.location = $('.calendarwrapper').data('coach-id');
+        args.moduleid = $('.calendarwrapper').data('module-id');
+        args.courseid = $('.calendarwrapper').data('courseid');
+
+        this.bodyPromise = Fragment.loadFragment('mod_virtualcoach', 'event_form', this.getContextId(), args);
+
+        this.setBody(this.bodyPromise);
+
+        this.bodyPromise.then(function() {
+            this.enableButtons();
+            return;
+        }.bind(this))
+            .fail(Notification.exception)
+            .always(function() {
+                this.reloadingBody = false;
+                return;
+            }.bind(this))
+            .fail(Notification.exception);
+
+        return this.bodyPromise;
+    };
+
+    /**
+     * Submit the form data for the event form.
+     *
+     * @method submitCreateUpdateForm
+     * @param {string} formdata The URL encoded values from the form
+     * @return {promise} Resolved with the new or edited event
+     */
+    CalendarRepository.submitCreateUpdateForm = function(formdata) {
+        var request = {
+            methodname: 'mod_virtualcoach_submit_create_update_form',
+            args: {
+                formdata: formdata
+            }
+        };
+
+        return Ajax.call([request])[0];
+    };
+
+    /**
+     * Get a calendar event by id.
+     *
+     * @method getEventById
+     * @param {int} eventId The event id.
+     * @return {promise} Resolved with requested calendar event
+     */
+    CalendarRepository.getEventById = function(eventId) {
+
+        var request = {
+            methodname: 'mod_virtualcoach_get_calendar_event_by_id',
+            args: {
+                eventid: eventId
+            }
+        };
+
+        return Ajax.call([request])[0];
+    };
+
+    /**
+     * Delete a calendar event.
+     *
+     * @method deleteEvent
+     * @param {int} eventId The event id.
+     * @param {bool} deleteSeries Whether to delete all events in the series
+     * @return {promise} Resolved with requested calendar event
+     */
+    CalendarRepository.deleteEvent = function(eventId, deleteSeries) {
+        if (typeof deleteSeries === 'undefined') {
+            deleteSeries = false;
+        }
+        var request = {
+            methodname: 'mod_virtualcoach_delete_calendar_events',
+            args: {
+                events: [{
+                    eventid: eventId,
+                    repeat: deleteSeries,
+                }]
+            }
+        };
+
+        return Ajax.call([request])[0];
+    };
 
     var SELECTORS = {
         COACH_SELECTOR: 'select[name="coach"]',
