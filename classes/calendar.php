@@ -115,7 +115,7 @@ class calendar {
 FROM {event} e
 INNER JOIN {user} u ON u.id = e.userid
 INNER JOIN {coach} c ON c.id = $location
-WHERE u.auth = 'ldap' AND e.eventtype 'virtualcoach' AND $locationIsNotEmpty AND";
+WHERE u.auth = 'ldap' AND e.eventtype = 'virtualcoach' AND $locationIsNotEmpty AND";
         if ($allow == self::ALLOW_ACCESS) {
             $sql .= " $time BETWEEN e.timestart AND e.timestart + e.timeduration\n";
         } elseif ($allow == self::SEND_MSG) {
