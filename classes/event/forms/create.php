@@ -318,7 +318,7 @@ class create extends \moodleform {
      * @throws coding_exception
      */
     protected function add_event_duration_elements($mform) {
-        $mform->addElement('hidden', 'duration', null, get_string('duration_hours', 'virtualcoach'), 2);
+        $mform->addElement('hidden', 'duration', null);
         $mform->setType('duration', PARAM_INT);
         $mform->setDefault('duration', 2);
         $mform->addElement('select', 'timedurationminutes', get_string('duration_hours', 'virtualcoach'), $this->getOptions(5));
