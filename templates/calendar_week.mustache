@@ -36,7 +36,7 @@
 </div>
 {{#js}}
 require(['jquery', 'core_calendar/calendar', 'mod_virtualcoach/view_manager', 'mod_virtualcoach/fixed_day_names'], function($, Calendar, ViewManager, FixedDayNames) {
-    root = $("#calendar-month-{{uniqid}}")
+    root = $("#calendar-month-{{uniqid}}");
     Calendar.init(root);
     ViewManager.init(root);
     FixedDayNames.init(root);
